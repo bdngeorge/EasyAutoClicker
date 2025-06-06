@@ -22,7 +22,7 @@ public sealed partial class MainPage : Page
     private readonly DispatcherTimer _clickTimer = new();
     private readonly DispatcherTimer _cursorTimer = new();
 
-    private const int DELAY = 100; // Delay in milliseconds for mouse events
+    private const int DELAY = 200; // Delay in milliseconds for mouse events
     private int _count = 0;
     private InputValues _inputValues = new();
     private bool _isClicking = false;
@@ -160,12 +160,11 @@ public sealed partial class MainPage : Page
                 ? _inputValues.CursorPosition.Item2 : null,
         };
 
-        // TODO: Handle right and middle clicks
         SendSingleClick(input);
 
         if (_inputValues.ClickType == ClickTypes.Double)
         {
-            Thread.Sleep(DELAY); // Small delay for double click
+            Thread.Sleep(DELAY);
             SendSingleClick(input);
         }
 
@@ -182,7 +181,6 @@ public sealed partial class MainPage : Page
     private void SendSingleClick(InputEvent input)
     {
         _clickHelper.SimulateMouseClick(input);
-        input.Action = InputActions.ClickLeftUp;
-        _clickHelper.SimulateMouseClick(input);
+        _clickHelper.SimulateMouseClick(InputEvent.GetFlippedMouseInput(input));
     }
 }
