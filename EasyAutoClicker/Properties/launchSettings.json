@@ -1,0 +1,10 @@
+{
+  "profiles": {
+    "EasyAutoClicker (Package)": {
+      "commandName": "MsixPackage"
+    },
+    "EasyAutoClicker (Unpackaged)": {
+      "commandName": "Project"
+    }
+  }
+}
