@@ -9,9 +9,9 @@
   IgnorableNamespaces="uap rescap uap18">
 
   <Identity
-    Name="2f449d77-bee8-4086-b215-ec128ab8fafe"
+    Name="bdngeorge.EasyAutoClicker"
     Publisher="CN=bdngeorge"
-    Version="1.0.0.0" />
+    Version="1.0.1.0" />
 
   <mp:PhoneIdentity PhoneProductId="2f449d77-bee8-4086-b215-ec128ab8fafe" PhonePublisherId="00000000-0000-0000-0000-000000000000"/>
 

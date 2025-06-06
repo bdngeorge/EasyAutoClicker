@@ -2,7 +2,6 @@
 using EasyAutoClicker.Views.Pages;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.UI.Xaml;
-using Microsoft.UI.Xaml.Controls;
 using System;
 
 // To learn more about WinUI, the WinUI project structure,
