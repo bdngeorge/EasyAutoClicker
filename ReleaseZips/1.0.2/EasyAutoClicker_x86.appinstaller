@@ -1,0 +1,15 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<AppInstaller
+	Uri="https://github.com/bdngeorge/EasyAutoClicker/releases/download/Release-1.0.2/EasyAutoClicker_1.0.2.0_x64.msix/EasyAutoClicker_x86.appinstaller"
+	Version="1.0.2.0" xmlns="http://schemas.microsoft.com/appx/appinstaller/2017/2">
+	<MainPackage
+		Name="bdngeorge.EasyAutoClicker"
+		Version="1.0.2.0"
+		Publisher="CN=bdngeorge"
+		Uri="https://github.com/bdngeorge/EasyAutoClicker/releases/download/Release-1.0.2/EasyAutoClicker_1.0.2.0_x64.msix/EasyAutoClicker_1.0.2.0_x86_Test/EasyAutoClicker_1.0.2.0_x86.msix"
+		ProcessorArchitecture="x86" />
+	<UpdateSettings>
+		<OnLaunch
+			HoursBetweenUpdateChecks="0" />
+	</UpdateSettings>
+</AppInstaller>
