@@ -279,17 +279,18 @@ public sealed partial class RecordAndPlaybackPage : Page
                         currentTimestamp = Math.Max(lastTimestamp + maxOffset, currentTimestamp);
                 }
 
-                int wait = currentTimestamp - (int)stopWatch.ElapsedMilliseconds;
-                if (wait > 0)
-                    await Task.Delay(wait);
-                
+                while (stopWatch.ElapsedMilliseconds < currentTimestamp)
+                {
+                    await Task.Yield();
+                }
+
                 lastTimestamp = currentTimestamp;
 
                 if (!_isPlaying) return; // Check right before sending input
                 switch (input.Type)
                 {
                     case InputTypes.Mouse:
-                        SimulateMouse(input);
+                        await SimulateMouse(input);
                         break;
                     case InputTypes.Keyboard:
                         if (KeyboardCheck.IsChecked ?? false)
@@ -312,7 +313,7 @@ public sealed partial class RecordAndPlaybackPage : Page
         UpdateUIOnRecordingEnd();
     }
 
-    private void SimulateMouse(InputEvent input)
+    private async Task SimulateMouse(InputEvent input)
     {
         if (input.X == null || input.Y == null) return;
 
@@ -322,7 +323,7 @@ public sealed partial class RecordAndPlaybackPage : Page
         }
         else
         {
-            _inputHelper.SimulateMouseClick(input);
+            await _inputHelper.SimulateMouseClickAsync(input);
         }
     }
 

@@ -6,6 +6,7 @@ using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using System;
 using System.Threading;
+using System.Threading.Tasks;
 using static EasyAutoClicker.Services.Helpers.Win32ApiHelper;
 
 namespace EasyAutoClicker.Views.Pages;
@@ -141,7 +142,7 @@ public sealed partial class MainPage : Page
         InputRecorderHelper.StopMouseHook();
     }
 
-    private void ClickLoop(object? sender, object? e)
+    private async void ClickLoop(object? sender, object? e)
     {
         if (_inputValues.LoopTypes == LoopTypes.Count) _count++;
         if (_inputValues.IntervalType == IntervalTypes.Random)
@@ -160,12 +161,12 @@ public sealed partial class MainPage : Page
                 ? _inputValues.CursorPosition.Item2 : null,
         };
 
-        SendSingleClick(input);
+        await SendSingleClickAsync(input);
 
         if (_inputValues.ClickType == ClickTypes.Double)
         {
             Thread.Sleep(DELAY);
-            SendSingleClick(input);
+            await SendSingleClickAsync(input);
         }
 
         if (_inputValues.LoopTypes == LoopTypes.Count && _count >= _inputValues.RepeatCount)
@@ -178,9 +179,9 @@ public sealed partial class MainPage : Page
         }
     }
 
-    private void SendSingleClick(InputEvent input)
+    private async Task SendSingleClickAsync(InputEvent input)
     {
-        _clickHelper.SimulateMouseClick(input);
-        _clickHelper.SimulateMouseClick(InputEvent.GetFlippedMouseInput(input));
+        await _clickHelper.SimulateMouseClickAsync(input);
+        await _clickHelper.SimulateMouseClickAsync(InputEvent.GetFlippedMouseInput(input));
     }
 }

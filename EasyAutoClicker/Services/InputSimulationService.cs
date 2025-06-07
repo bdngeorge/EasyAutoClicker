@@ -1,6 +1,7 @@
 ﻿using EasyAutoClicker.Core;
 using System;
 using System.Runtime.InteropServices;
+using System.Threading.Tasks;
 using static EasyAutoClicker.Services.Helpers.Win32ApiHelper;
 
 namespace EasyAutoClicker.Services;
@@ -11,7 +12,7 @@ public interface IInputSimulationService
     /// Simulates a mouse click at the current or given mouse position.
     /// </summary>
     /// <param name="input">The input object.</param>
-    void SimulateMouseClick(InputEvent input);
+    Task SimulateMouseClickAsync(InputEvent input);
 
     /// <summary>
     /// Simulates a key press for the given key code.
@@ -31,12 +32,13 @@ public sealed partial class InputSimulationService : IInputSimulationService
     private const uint KEYEVENTF_KEYUP = 0x0002;
     private const uint KEYEVENTF_KEYDOWN = 0x0000;
 
-    public void SimulateMouseClick(InputEvent input)
+    public async Task SimulateMouseClickAsync(InputEvent input)
     {
         var mouseButtonFlags = GetMouseButtonFlag(input.Action);
 
-        if (input.X.HasValue && input.Y.HasValue)
+        if (input.X.HasValue && input.Y.HasValue) 
             SetCursorPos(input.X.Value, input.Y.Value);
+        
 
         var newInput = new INPUT
         {
@@ -55,6 +57,7 @@ public sealed partial class InputSimulationService : IInputSimulationService
             }
         };
 
+        await Task.Delay(5);
         SendInput(1, [newInput], Marshal.SizeOf<INPUT>());
     }
 
@@ -71,7 +74,7 @@ public sealed partial class InputSimulationService : IInputSimulationService
                 {
                     wVk = (ushort)input.Key.Value,
                     wScan = 0,
-                    dwFlags = input.Action == InputActions.KeyUp ? 0x0002u : 0,
+                    dwFlags = input.Action == InputActions.KeyUp ? KEYEVENTF_KEYUP : KEYEVENTF_KEYDOWN,
                     time = 0,
                     dwExtraInfo = IntPtr.Zero
                 }

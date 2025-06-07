@@ -15,8 +15,8 @@ namespace EasyAutoClicker.Core.Helpers;
 
 internal static class InputRecorderHelper
 {
-    private static HookProc? _keyboardProc;
-    private static HookProc? _mouseProc;
+    private static readonly HookProc _keyboardProc = KeyboardHookCallback;
+    private static readonly HookProc _mouseProc = MouseHookCallback;
     private static nint _keyboardHook = nint.Zero;
     private static nint _mouseHook = nint.Zero;
 
@@ -53,9 +53,6 @@ internal static class InputRecorderHelper
         _recordingStart = recordingStart;
         _inputEvents = [];
 
-        _keyboardProc = KeyboardHookCallback;
-        _mouseProc = MouseHookCallback;
-
         using var curProcess = Process.GetCurrentProcess();
         using var curModule = curProcess.MainModule;
 
@@ -80,7 +77,6 @@ internal static class InputRecorderHelper
     internal static void StartMouseHook(Page page)
     {
         _originPage = page;
-        _mouseProc = MouseHookCallback;
 
         _mouseHook = SetWindowsHookEx(WH_MOUSE_LL, _mouseProc, GetModuleHandleFromName(), 0);
     }
@@ -106,9 +102,9 @@ internal static class InputRecorderHelper
     {
         if (nCode >= 0)
         {
-            var kbData = Marshal.PtrToStructure<KEYBDINPUT>(lParam);
+            var kbData = Marshal.PtrToStructure<KBDLLHOOKSTRUCT>(lParam);
 
-            if (kbData.wVk == VK_F9 || kbData.wVk == VK_F10)
+            if (kbData.vkCode == VK_F9 || kbData.vkCode == VK_F10)
                 return CallNextHookEx(_keyboardHook, nCode, wParam, lParam);
 
             InputActions action;
@@ -123,7 +119,7 @@ internal static class InputRecorderHelper
             {
                 Type = InputTypes.Keyboard,
                 Action = action,
-                Key = kbData.wVk,
+                Key = kbData.vkCode,
                 Timestamp = Environment.TickCount - _recordingStart
             });
         }
@@ -134,8 +130,12 @@ internal static class InputRecorderHelper
     {
         if (nCode >= 0)
         {
-            GetCursorPos(out POINT pos);
-            var mouseData = Marshal.PtrToStructure<MOUSEINPUT>(lParam);
+            var mouseData = Marshal.PtrToStructure<MSLLHOOKSTRUCT>(lParam);
+            var pos = new POINT {
+                X = mouseData.pt.X,
+                Y = mouseData.pt.Y
+            };
+
             int message = wParam.ToInt32();
 
             if (wParam == WM_LBUTTONDOWN && _originPage is MainPage mainPage)
