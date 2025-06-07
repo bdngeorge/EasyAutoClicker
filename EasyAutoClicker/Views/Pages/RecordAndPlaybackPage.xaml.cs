@@ -258,7 +258,7 @@ public sealed partial class RecordAndPlaybackPage : Page
         var stopWatch = Stopwatch.StartNew();
         var rng = new Random(DateTime.Now.Millisecond);
 
-        var maxOffset = 128;
+        var maxOffset = 64;
         var randomDelayCheck = RandomDelayCheck.IsChecked ?? false;
 
         for (int i = 0; i < repetitions; i++)
@@ -271,23 +271,22 @@ public sealed partial class RecordAndPlaybackPage : Page
                 token.ThrowIfCancellationRequested();
 
                 int offset = rng.Next(0, maxOffset);
-                int currentTimestamp = randomDelayCheck && input.Action != InputActions.Move
-                    ? (int)((input.Timestamp + offset) / speedMultiplier) 
-                    : (int)((input.Timestamp) / speedMultiplier);
 
-                if (randomDelayCheck)
+                int baseTimestamp = (int)(input.Timestamp / speedMultiplier);
+                int baseDelay = baseTimestamp - lastTimestamp;
+
+                if (baseDelay > 0)
                 {
-                    if (i == 0)
-                        currentTimestamp = Math.Max(0, currentTimestamp);
-                    else
-                        currentTimestamp = Math.Max(lastTimestamp + maxOffset, currentTimestamp);
+                    int jitter = (randomDelayCheck && input.Action != InputActions.Move)
+                        ? offset
+                        : 0;
+
+                    int adjustedDelay = Math.Max(5, baseDelay + jitter);
+
+                    await Task.Delay(adjustedDelay, token);
                 }
 
-                int wait = currentTimestamp - (int)stopWatch.ElapsedMilliseconds;
-                if (wait > 0)
-                    await Task.Delay(wait, token);
-
-                lastTimestamp = currentTimestamp;
+                lastTimestamp = baseTimestamp;
 
                 switch (input.Type)
                 {
