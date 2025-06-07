@@ -22,31 +22,41 @@ internal sealed partial class Win32ApiHelper
         public InputUnion u;
     }
 
+    [StructLayout(LayoutKind.Sequential)]
+    internal struct MOUSEINPUT
+    {
+        public int dx;
+        public int dy;
+        public uint mouseData;
+        public uint dwFlags;
+        public uint time;
+        public IntPtr dwExtraInfo;
+    }
+
+    [StructLayout(LayoutKind.Sequential)]
+    internal struct KEYBDINPUT
+    {
+        public ushort wVk;
+        public ushort wScan;
+        public uint dwFlags;
+        public uint time;
+        public IntPtr dwExtraInfo;
+    }
+
+    [StructLayout(LayoutKind.Sequential)]
+    internal struct HARDWAREINPUT
+    {
+        public uint uMsg;
+        public ushort wParamL;
+        public ushort wParamH;
+    }
+
     [StructLayout(LayoutKind.Explicit)]
     internal struct InputUnion
     {
-        [FieldOffset(0)] public MSLLHOOKSTRUCT mi;
-        [FieldOffset(0)] public KBDLLHOOKSTRUCT ki;
-    }
-
-    [StructLayout(LayoutKind.Sequential)]
-    internal struct MSLLHOOKSTRUCT
-    {
-        internal POINT pt;
-        internal uint mouseData;
-        internal uint dwFlags;
-        internal uint time;
-        internal IntPtr dwExtraInfo;
-    }
-
-    [StructLayout(LayoutKind.Sequential)]
-    internal struct KBDLLHOOKSTRUCT
-    {
-        internal ushort wVk;
-        internal ushort wScan;
-        internal uint dwFlags;
-        internal uint time;
-        internal IntPtr dwExtraInfo;
+        [FieldOffset(0)] public MOUSEINPUT mi;
+        [FieldOffset(0)] public KEYBDINPUT ki;
+        [FieldOffset(0)] public HARDWAREINPUT hi;
     }
 
     [LibraryImport("user32.dll", EntryPoint = "SetWindowLongPtrW", SetLastError = true)]

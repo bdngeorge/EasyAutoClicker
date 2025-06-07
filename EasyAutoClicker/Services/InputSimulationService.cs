@@ -40,9 +40,20 @@ public sealed partial class InputSimulationService : IInputSimulationService
 
         var newInput = new INPUT
         {
-            type = (uint)InputTypes.Mouse
+            type = (uint)InputTypes.Mouse,
+            u = new InputUnion
+            {
+                mi = new MOUSEINPUT
+                {
+                    dx = 0,
+                    dy = 0,
+                    mouseData = 0,
+                    dwFlags = mouseButtonFlags,
+                    time = 0,
+                    dwExtraInfo = IntPtr.Zero
+                }
+            }
         };
-        newInput.u.mi.dwFlags = mouseButtonFlags;
 
         SendInput(1, [newInput], Marshal.SizeOf<INPUT>());
     }
@@ -56,10 +67,13 @@ public sealed partial class InputSimulationService : IInputSimulationService
             type = (uint)InputTypes.Keyboard,
             u = new InputUnion
             {
-                ki = new KBDLLHOOKSTRUCT
+                ki = new KEYBDINPUT
                 {
                     wVk = (ushort)input.Key.Value,
-                    dwFlags = input.Action == InputActions.KeyUp ? KEYEVENTF_KEYUP : KEYEVENTF_KEYDOWN,
+                    wScan = 0,
+                    dwFlags = input.Action == InputActions.KeyUp ? 0x0002u : 0,
+                    time = 0,
+                    dwExtraInfo = IntPtr.Zero
                 }
             }
         };

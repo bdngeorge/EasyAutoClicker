@@ -106,7 +106,7 @@ internal static class InputRecorderHelper
     {
         if (nCode >= 0)
         {
-            var kbData = Marshal.PtrToStructure<KBDLLHOOKSTRUCT>(lParam);
+            var kbData = Marshal.PtrToStructure<KEYBDINPUT>(lParam);
 
             if (kbData.wVk == VK_F9 || kbData.wVk == VK_F10)
                 return CallNextHookEx(_keyboardHook, nCode, wParam, lParam);
@@ -135,7 +135,7 @@ internal static class InputRecorderHelper
         if (nCode >= 0)
         {
             GetCursorPos(out POINT pos);
-            var mouseData = Marshal.PtrToStructure<MSLLHOOKSTRUCT>(lParam);
+            var mouseData = Marshal.PtrToStructure<MOUSEINPUT>(lParam);
             int message = wParam.ToInt32();
 
             if (wParam == WM_LBUTTONDOWN && _originPage is MainPage mainPage)
