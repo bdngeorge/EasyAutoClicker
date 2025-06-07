@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Runtime.InteropServices;
+using System.Threading;
 using System.Threading.Tasks;
 using static EasyAutoClicker.Services.Helpers.Win32ApiHelper;
 
@@ -39,13 +40,13 @@ internal static class InputRecorderHelper
     private const uint VK_F9 = 0x78;
     private const uint VK_F10 = 0x79;
 
-    private const int _minMoveDistance = 5;
-    private const int _minMoveTimestampDifference = 16;
+    private const int _minMoveDistance = 10;           
+    private const int _minMoveTimestampDifference = 16; 
     private static int _lastMoveTimestamp = 0;
     private static int _recordingStart = 0;
 
-    private static Page _originPage = new();
-    private static List<InputEvent> _inputEvents = [];
+    private static Page _originPage = new(); 
+    private static volatile List<InputEvent> _inputEvents = [];
 
     internal static void StartAllHook(Page page, int recordingStart)
     {
@@ -53,10 +54,7 @@ internal static class InputRecorderHelper
         _recordingStart = recordingStart;
         _inputEvents = [];
 
-        using var curProcess = Process.GetCurrentProcess();
-        using var curModule = curProcess.MainModule;
-
-        var hInstance = GetModuleHandleFromName();
+        var hInstance = GetModuleHandle(null);
         _keyboardHook = SetWindowsHookEx(WH_KEYBOARD_LL, _keyboardProc, hInstance, 0);
         _mouseHook = SetWindowsHookEx(WH_MOUSE_LL, _mouseProc, hInstance, 0);
     }
@@ -78,7 +76,7 @@ internal static class InputRecorderHelper
     {
         _originPage = page;
 
-        _mouseHook = SetWindowsHookEx(WH_MOUSE_LL, _mouseProc, GetModuleHandleFromName(), 0);
+        _mouseHook = SetWindowsHookEx(WH_MOUSE_LL, _mouseProc, GetModuleHandle(null), 0);
     }
 
     internal static void StopMouseHook()
@@ -88,14 +86,6 @@ internal static class InputRecorderHelper
             UnhookWindowsHookEx(_mouseHook);
             _mouseHook = nint.Zero;
         }
-    }
-
-    private static nint GetModuleHandleFromName()
-    {
-        using var curProcess = Process.GetCurrentProcess();
-        using var curModule = curProcess.MainModule;
-
-        return GetModuleHandle(curModule?.ModuleName ?? "");
     }
 
     private static nint KeyboardHookCallback(int nCode, nint wParam, nint lParam)
@@ -115,13 +105,14 @@ internal static class InputRecorderHelper
             else
                 return CallNextHookEx(_keyboardHook, nCode, wParam, lParam);
 
-            _inputEvents.Add(new InputEvent
+            var input = new InputEvent
             {
                 Type = InputTypes.Keyboard,
                 Action = action,
                 Key = kbData.vkCode,
                 Timestamp = Environment.TickCount - _recordingStart
-            });
+            };
+            Task.Run(() => _inputEvents.Add(input));
         }
         return CallNextHookEx(_keyboardHook, nCode, wParam, lParam);
     }

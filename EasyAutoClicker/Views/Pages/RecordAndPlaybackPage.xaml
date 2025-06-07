@@ -135,7 +135,7 @@
                         </DropDownButton>
                     </Grid>
 
-                    <!-- Repititions -->
+                    <!-- Repetitions -->
                     <Grid Grid.Row="1">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="*" />
@@ -145,25 +145,25 @@
                         <TextBlock 
                             Grid.Column="0" 
                             x:Name="PlaybackRepitionsText" 
-                            Text="Playback Repititions" 
+                            Text="Playback Repetitions" 
                             TextWrapping="Wrap"
                             VerticalAlignment="Center" 
                             HorizontalAlignment="Right" 
                             Padding="0 0 5 0" />
-                        <DropDownButton Grid.Column="1" x:Name="PlaybackRepititionsDropdown" Content="1x" Tag="1" HorizontalAlignment="Stretch">
+                        <DropDownButton Grid.Column="1" x:Name="PlaybackRepetitionsDropdown" Content="1x" Tag="1" HorizontalAlignment="Stretch">
                             <DropDownButton.Flyout>
                                 <MenuFlyout>
-                                    <MenuFlyoutItem Text="1x" Tag="1" Click="PlaybackRepititionsDropdown_Click"/>
-                                    <MenuFlyoutItem Text="2x" Tag="2" Click="PlaybackRepititionsDropdown_Click"/>
-                                    <MenuFlyoutItem Text="3x" Tag="3" Click="PlaybackRepititionsDropdown_Click"/>
-                                    <MenuFlyoutItem Text="4x" Tag="4" Click="PlaybackRepititionsDropdown_Click"/>
-                                    <MenuFlyoutItem Text="5x" Tag="5" Click="PlaybackRepititionsDropdown_Click"/>
-                                    <MenuFlyoutItem Text="6x" Tag="6" Click="PlaybackRepititionsDropdown_Click"/>
-                                    <MenuFlyoutItem Text="7x" Tag="7" Click="PlaybackRepititionsDropdown_Click"/>
-                                    <MenuFlyoutItem Text="8x" Tag="8" Click="PlaybackRepititionsDropdown_Click"/>
-                                    <MenuFlyoutItem Text="9x" Tag="9" Click="PlaybackRepititionsDropdown_Click"/>
-                                    <MenuFlyoutItem Text="10x" Tag="10" Click="PlaybackRepititionsDropdown_Click"/>
-                                    <MenuFlyoutItem Text="1000x" Tag="1000" Click="PlaybackRepititionsDropdown_Click"/>
+                                    <MenuFlyoutItem Text="1x" Tag="1" Click="PlaybackRepetitionsDropdown_Click"/>
+                                    <MenuFlyoutItem Text="2x" Tag="2" Click="PlaybackRepetitionsDropdown_Click"/>
+                                    <MenuFlyoutItem Text="3x" Tag="3" Click="PlaybackRepetitionsDropdown_Click"/>
+                                    <MenuFlyoutItem Text="4x" Tag="4" Click="PlaybackRepetitionsDropdown_Click"/>
+                                    <MenuFlyoutItem Text="5x" Tag="5" Click="PlaybackRepetitionsDropdown_Click"/>
+                                    <MenuFlyoutItem Text="6x" Tag="6" Click="PlaybackRepetitionsDropdown_Click"/>
+                                    <MenuFlyoutItem Text="7x" Tag="7" Click="PlaybackRepetitionsDropdown_Click"/>
+                                    <MenuFlyoutItem Text="8x" Tag="8" Click="PlaybackRepetitionsDropdown_Click"/>
+                                    <MenuFlyoutItem Text="9x" Tag="9" Click="PlaybackRepetitionsDropdown_Click"/>
+                                    <MenuFlyoutItem Text="10x" Tag="10" Click="PlaybackRepetitionsDropdown_Click"/>
+                                    <MenuFlyoutItem Text="1000x" Tag="1000" Click="PlaybackRepetitionsDropdown_Click"/>
                                 </MenuFlyout>
                             </DropDownButton.Flyout>
                         </DropDownButton>

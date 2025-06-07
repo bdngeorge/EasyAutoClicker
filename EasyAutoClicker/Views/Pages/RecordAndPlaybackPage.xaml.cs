@@ -10,6 +10,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Text.Json;
+using System.Threading;
 using System.Threading.Tasks;
 using Windows.Storage.Pickers;
 using WinRT.Interop;
@@ -25,6 +26,7 @@ public sealed partial class RecordAndPlaybackPage : Page
     private readonly IWindowSizeService _windowSizeHelper;
     private readonly IInputSimulationService _inputHelper;
 
+    private static CancellationTokenSource? _playbackCts;
     private static readonly ToastContentBuilder _recordingFinishedNotif = new ToastContentBuilder()
         .AddHeader("EasyAutoClicker_0817", "EasyAutoClicker", "")
         .AddAudio(new Uri("ms-appx:///Assets/Sounds/Notification.wav"))
@@ -54,12 +56,12 @@ public sealed partial class RecordAndPlaybackPage : Page
         }
     }
 
-    private void PlaybackRepititionsDropdown_Click(object sender, RoutedEventArgs e)
+    private void PlaybackRepetitionsDropdown_Click(object sender, RoutedEventArgs e)
     {
         if (sender is MenuFlyoutItem item)
         {
-            PlaybackRepititionsDropdown.Content = item.Text;
-            PlaybackRepititionsDropdown.Tag = item.Tag;
+            PlaybackRepetitionsDropdown.Content = item.Text;
+            PlaybackRepetitionsDropdown.Tag = item.Tag;
         }
     }
 
@@ -165,6 +167,7 @@ public sealed partial class RecordAndPlaybackPage : Page
             _isPlaying = !_isPlaying;
             StartRecordingButton.IsEnabled = true;
 
+            _playbackCts?.Cancel();
             UpdateUIOnRecordingEnd();
 
             return;
@@ -179,7 +182,7 @@ public sealed partial class RecordAndPlaybackPage : Page
         var inputEvents = JsonSerializer.Deserialize<List<InputEvent>>(json);
 
         var playbackSpeed = double.Parse(PlaybackSpeedDropdown.Tag?.ToString() ?? "1.0");
-        var playbackRepititions = int.Parse(PlaybackRepititionsDropdown.Tag?.ToString() ?? "1");
+        var playbackRepetitions = int.Parse(PlaybackRepetitionsDropdown.Tag?.ToString() ?? "1");
 
         if (inputEvents == null || inputEvents.Count == 0)
         {
@@ -192,10 +195,11 @@ public sealed partial class RecordAndPlaybackPage : Page
         {
             _isPlaying = !_isPlaying;
             StartRecordingButton.IsEnabled = false;
-            PlaybackRepitionsText.Text = $"Repitions Remaining: {playbackRepititions}";
+            PlaybackRepitionsText.Text = $"Repitions Remaining: {playbackRepetitions}";
 
             // Let this run on a background thread to avoid blocking the UI
-            _ = PlayInputEventsAsync(inputEvents, playbackRepititions, playbackSpeed);
+            _playbackCts = new CancellationTokenSource();
+            _ = PlayInputEventsAsync(inputEvents, playbackRepetitions, playbackSpeed, _playbackCts.Token);
         }
     }
 
@@ -241,7 +245,7 @@ public sealed partial class RecordAndPlaybackPage : Page
         _windowSizeHelper.ResizeWindow(window, 500, 725);
     }
 
-    private async Task PlayInputEventsAsync(List<InputEvent> inputEvents, int repititions, double speedMultiplier)
+    private async Task PlayInputEventsAsync(List<InputEvent> inputEvents, int repetitions, double speedMultiplier, CancellationToken token)
     {
         if (inputEvents == null || inputEvents.Count == 0)
         {
@@ -254,20 +258,20 @@ public sealed partial class RecordAndPlaybackPage : Page
         var stopWatch = Stopwatch.StartNew();
         var rng = new Random(DateTime.Now.Millisecond);
 
-        var maxOffset = 32;
+        var maxOffset = 128;
         var randomDelayCheck = RandomDelayCheck.IsChecked ?? false;
 
-        while (repititions > 0 && _isPlaying)
+        for (int i = 0; i < repetitions; i++)
         {
             stopWatch.Start();
             int lastTimestamp = 0;
 
-            for (int i = 0; i < inputEvents.Count; i++)
+            foreach (var input in inputEvents)
             {
-                var input = inputEvents[i];
+                token.ThrowIfCancellationRequested();
 
                 int offset = rng.Next(0, maxOffset);
-                int currentTimestamp = randomDelayCheck
+                int currentTimestamp = randomDelayCheck && input.Action != InputActions.Move
                     ? (int)((input.Timestamp + offset) / speedMultiplier) 
                     : (int)((input.Timestamp) / speedMultiplier);
 
@@ -279,14 +283,12 @@ public sealed partial class RecordAndPlaybackPage : Page
                         currentTimestamp = Math.Max(lastTimestamp + maxOffset, currentTimestamp);
                 }
 
-                while (stopWatch.ElapsedMilliseconds < currentTimestamp)
-                {
-                    await Task.Yield();
-                }
+                int wait = currentTimestamp - (int)stopWatch.ElapsedMilliseconds;
+                if (wait > 0)
+                    await Task.Delay(wait, token);
 
                 lastTimestamp = currentTimestamp;
 
-                if (!_isPlaying) return; // Check right before sending input
                 switch (input.Type)
                 {
                     case InputTypes.Mouse:
@@ -302,11 +304,11 @@ public sealed partial class RecordAndPlaybackPage : Page
             stopWatch.Stop();
             stopWatch.Reset();
 
-            repititions--;
+            repetitions--;
 
             DispatcherQueue.TryEnqueue(() =>
             {
-                PlaybackRepitionsText.Text = $"Repitions Remaining: {repititions}";
+                PlaybackRepitionsText.Text = $"Repitions Remaining: {repetitions}";
             });
         }
 
