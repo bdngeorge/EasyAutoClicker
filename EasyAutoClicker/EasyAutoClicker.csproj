@@ -103,7 +103,7 @@
     <AppxSymbolPackageEnabled>True</AppxSymbolPackageEnabled>
     <GenerateTestArtifacts>True</GenerateTestArtifacts>
     <AppxBundle>Always</AppxBundle>
-    <AppInstallerUri>https://github.com/bdngeorge/EasyAutoClicker/releases/download/Release-1.0.4/EasyAutoClicker_1.0.4._x64.zip</AppInstallerUri>
+    <AppInstallerUri>https://github.com/bdngeorge/EasyAutoClicker/releases/download/Release-1.0.5/EasyAutoClicker_1.0.5._x64.zip</AppInstallerUri>
     <HoursBetweenUpdateChecks>0</HoursBetweenUpdateChecks>
     <AppxBundlePlatforms>x86|x64|arm64</AppxBundlePlatforms>
   </PropertyGroup>

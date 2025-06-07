@@ -263,7 +263,7 @@ public sealed partial class RecordAndPlaybackPage : Page
 
         for (int i = 0; i < repetitions; i++)
         {
-            stopWatch.Start();
+            stopWatch.Restart();
             int lastTimestamp = 0;
 
             foreach (var input in inputEvents)
@@ -301,14 +301,10 @@ public sealed partial class RecordAndPlaybackPage : Page
                 }
             }
 
-            stopWatch.Stop();
-            stopWatch.Reset();
-
-            repetitions--;
-
+            int remaining = repetitions - i - 1;
             DispatcherQueue.TryEnqueue(() =>
             {
-                PlaybackRepitionsText.Text = $"Repitions Remaining: {repetitions}";
+                PlaybackRepitionsText.Text = $"Repitions Remaining: {remaining}";
             });
         }
 
