@@ -8,10 +8,10 @@ using Microsoft.UI.Xaml.Controls;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.IO;
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
+using Windows.Storage;
 using Windows.Storage.Pickers;
 using WinRT.Interop;
 using static EasyAutoClicker.Services.Helpers.Win32ApiHelper;
@@ -88,7 +88,6 @@ public sealed partial class RecordAndPlaybackPage : Page
             SuggestedStartLocation = PickerLocationId.DocumentsLibrary,
             SuggestedFileName = "ClickerInputEvents.json"
         };
-
         InitializeWithWindow.Initialize(filePicker, hWnd);
 
         filePicker.FileTypeChoices.Add("JSON File", [".json"]);
@@ -96,27 +95,18 @@ public sealed partial class RecordAndPlaybackPage : Page
 
         if (file != null)
         {
-            var options = new JsonSerializerOptions
+            var json = JsonSerializer.Serialize(inputEvents);
+
+            try
             {
-                WriteIndented = true
-            };
+                await FileIO.WriteTextAsync(file, json);
 
-            string json = JsonSerializer.Serialize(inputEvents, options);
-
-            Windows.Storage.CachedFileManager.DeferUpdates(file);
-            await File.WriteAllTextAsync(file.Path, json);
-
-            Windows.Storage.Provider.FileUpdateStatus status =
-                await Windows.Storage.CachedFileManager.CompleteUpdatesAsync(file);
-
-            if (status == Windows.Storage.Provider.FileUpdateStatus.Complete)
-            {
                 FileName.Text = file.Name;
                 _logFilePath = file.Path;
                 FileName.TextTrimming = TextTrimming.CharacterEllipsis;
                 FileName.TextWrapping = TextWrapping.NoWrap;
             }
-            else
+            catch
             {
                 FileName.Text = "File couldn't be saved.";
                 FileName.TextTrimming = TextTrimming.None;
@@ -160,7 +150,7 @@ public sealed partial class RecordAndPlaybackPage : Page
         PlayRecordingButton.IsEnabled = false;
     }
 
-    private void PlayRecordingButton_Click(object sender, RoutedEventArgs e)
+    private async void PlayRecordingButton_Click(object sender, RoutedEventArgs e)
     {
         if (_isPlaying)
         {
@@ -178,7 +168,8 @@ public sealed partial class RecordAndPlaybackPage : Page
         PlayRecordingButton.Content = "End Recording (F10)";
         PlayRecordingButton.Style = (Style)Application.Current.Resources["CustomRedButtonStyle"];
 
-        var json = File.ReadAllText(_logFilePath);
+        var storageFile = await StorageFile.GetFileFromPathAsync(_logFilePath);
+        var json = await FileIO.ReadTextAsync(storageFile);
         var inputEvents = JsonSerializer.Deserialize<List<InputEvent>>(json);
 
         var playbackSpeed = double.Parse(PlaybackSpeedDropdown.Tag?.ToString() ?? "1.0");
